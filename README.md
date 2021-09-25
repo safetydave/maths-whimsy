@@ -17,3 +17,7 @@ Coding interesting maths problems; reference for techniques
 * [Square planet gravity](physics/square_planet_gravity.ipynb) - visualisations and numpy implementations for calculating gravitational fields around arbitraty planet shapes.
 * [Weird planet gravity](physics/weird_planet_gravity.ipynb) - visualising gravity around and on the surface of weirdly shaped planets (at least arbitraty 2d cross sections)
 * [Lagrange gravity](physics/gravity_lagrange.ipynb) - visualising orbital zones around a rotating planet-moon system
+
+### visualisation
+
+* [Odometer](vis/odometer.ipynb) - Display a float as a mechanical odometer readout
