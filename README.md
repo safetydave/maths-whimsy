@@ -11,7 +11,7 @@ Coding interesting maths problems; reference for techniques
 * [Rotating shapes constraints](cad/rotating_shapes_constraints.ipynb) - rotation extension to movement constraints
 
 ### machine learning
-* [Confusion Sankey](confusion_sankey.ipynb) - visualising classifier results or evaluation as Sankey diagrams, instead of typical confusion matrixes.
+* [Confusion Sankey](ml/confusion_sankey.ipynb) - visualising classifier results or evaluation as Sankey diagrams, instead of typical confusion matrixes.
 
 ### physics
 * [Square planet gravity](physics/square_planet_gravity.ipynb) - visualisations and numpy implementations for calculating gravitational fields around arbitraty planet shapes.
