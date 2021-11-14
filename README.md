@@ -10,6 +10,10 @@ Coding interesting maths problems; reference for techniques
 
 * [Rotating shapes constraints](cad/rotating_shapes_constraints.ipynb) - rotation extension to movement constraints
 
+### graphs
+
+* [graph_tool bipartite](graph_tool_bipartite.ipynb) - using graph_tool & numpy to do bipartite projections from Python (fast and memory-intensive)
+
 ### machine learning
 * [Confusion Sankey](ml/confusion_sankey.ipynb) - visualising classifier results or evaluation as Sankey diagrams, instead of typical confusion matrixes.
 
