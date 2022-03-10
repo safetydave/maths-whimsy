@@ -26,3 +26,4 @@ Coding interesting maths problems; reference for techniques
 ### visualisation
 
 * [Odometer](vis/odometer.ipynb) - Display a float as a mechanical odometer readout
+* [Map projection](vis/map_projection_vis.ipynb) - Visualising map coordinate projections with squash-stretch quiver plot
