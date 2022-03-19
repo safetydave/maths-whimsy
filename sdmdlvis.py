@@ -22,7 +22,9 @@ def sd_label(element):
 
 def equation_elements(equation):
     elements = []
-    if hasattr(equation, 'element'):
+    if sd_label(equation) is not None:
+        elements = [equation]
+    elif hasattr(equation, 'element'):
         elements = [equation.element]
     elif hasattr(equation, 'element_1'):
         root_elements = [equation.element_1, equation.element_2]
