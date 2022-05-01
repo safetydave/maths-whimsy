@@ -12,8 +12,8 @@ Coding interesting maths problems; reference for techniques
 
 ### graphs & matrices
 
-* [graph_tool bipartite](graph_tool_bipartite.ipynb) - using graph_tool & numpy to do bipartite projections from Python (fast and memory-intensive)
-* [numpig](numpig.ipynb) - specific example of a map reduce approach in numpy to process large matrices with limited memory
+* [graph_tool bipartite](graph/graph_tool_bipartite.ipynb) - using graph_tool & numpy to do bipartite projections from Python (fast and memory-intensive)
+* [numpig](graph/numpig.ipynb) - specific example of a map reduce approach in numpy to process large matrices with limited memory
 
 ### machine learning
 * [Confusion Sankey](ml/confusion_sankey.ipynb) - visualising classifier results or evaluation as Sankey diagrams, instead of typical confusion matrixes.
@@ -27,4 +27,4 @@ Coding interesting maths problems; reference for techniques
 
 * [Odometer](vis/odometer.ipynb) - Display a float as a mechanical odometer readout
 * [Map projection](vis/map_projection_vis.ipynb) - Visualising map coordinate projections with squash-stretch quiver plot
-* [System dynamics models](sd_model_vis.ipynb) - Visualise system dynamics models as a graph with [Python module](sdmdlvis.py)
+* [System dynamics models](vis/sd_model_vis.ipynb) - Visualise system dynamics models as a graph with [Python module](vis/sdmdlvis.py)
