@@ -17,6 +17,8 @@ Coding interesting maths problems; reference for techniques
 
 ### machine learning
 * [Confusion Sankey](ml/confusion_sankey.ipynb) - visualising classifier results or evaluation as Sankey diagrams, instead of typical confusion matrixes.
+* [Semantle Gradient Solver](ml/semantle_gradient_solver.ipynb) - basic gradient descent solver for semantle puzzle
+* [Semantle Simulator](ml/semantle_simulator.py) - simulator for semantle scores
 
 ### physics
 * [Square planet gravity](physics/square_planet_gravity.ipynb) - visualisations and numpy implementations for calculating gravitational fields around arbitraty planet shapes.
