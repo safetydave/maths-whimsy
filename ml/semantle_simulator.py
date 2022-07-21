@@ -11,7 +11,10 @@ class SemantleSimulator:
 
     def score_guess(self, guess, target=None):
         word = self.target if target is None else target
-        return self.wv.similarity(word, guess) * self.score_scaling
+        score = 0
+        if guess in self.wv:
+            score = self.wv.similarity(word, guess) * self.score_scaling
+        return score
 
     # todo I think semantle excludes uncommon words in this ranking
     def score_calibration(self, target=None):

@@ -38,7 +38,7 @@ class GradientNetwork:
         return sorted_spokes[-1]
 
     def find_new_node(self, embedding):
-        similarity_rank = self.similarity.similarity_rank(embedding)
+        similarity_rank = np.flip(np.argsort(self.similarity.similarities(embedding)))
         j = 0
         while similarity_rank[j] in self.nodes:
             j = j + 1
@@ -77,28 +77,28 @@ class GradientSolver:
     def make_guess(self):
         guess = None
         basis = (-1, (None, 0, -1))
-        if len(self.network.nodes) < self.seeds:
+        if len(self.network.nodes) < self.seeds or len(self.network.nodes) < 2:
             guess = self.seed_guess()
         else:
             guess, basis = self.directed_guess()
-        if self.log:
-          self.log_append('guess', guess)
-          self.log_append('basis', basis)
-        return guess, basis
+        if self.log: self.log_append('basis', basis)
+        return guess
 
     def merge_guess(self, guess, score, score_scaling):
+        if self.log: self.log_append('guess', guess)
         self.network.add_node(guess, score)
       
     def solve(self, semantle, max_guesses=500):
         if semantle.target not in self.similarity.vocabulary:
             return None, 0      
         eps = 0.1
-        guess, basis = self.make_guess()
+        guess = self.make_guess()
         score = semantle.score_guess(self.similarity.word_string(guess))
         while score < semantle.score_scaling - eps:
             self.merge_guess(guess, score, semantle.score_scaling)
-            guess, basis = self.make_guess()
+            guess = self.make_guess()
             score = semantle.score_guess(self.similarity.word_string(guess))
             if len(self.network.nodes) >= max_guesses:
                 break                 
+        if self.log: self.log_append('guess', guess)
         return guess, len(self.network.nodes) + 1
