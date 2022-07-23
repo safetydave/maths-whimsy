@@ -49,6 +49,9 @@ class CohortBayesSolver:
         # strength when normalised approximates bayesian probabilities
         self.strength = self.strength + observations
  
+    def guess_merged(self, guess):
+        return self.strength[guess] is ma.masked
+
     def solve(self, semantle):
         if semantle.target not in self.similarity.vocabulary:
             return None, 0

@@ -1,3 +1,4 @@
+from gensim.models import KeyedVectors
 import numpy as np
 import numpy.ma as ma
 from numpy.linalg import norm
@@ -7,10 +8,13 @@ import tensorflow_hub as hub
 
 class SimilarityModelW2V:
 
-    def __init__(self, semantics, base_vocabulary):
+    def __init__(self, base_vocabulary, semantics=None):
         self.description = 'w2v'
         self.semantics = semantics
-        self.vocabulary = [w for w in list(base_vocabulary) if w in semantics]
+        if self.semantics is None:
+            model = "data/GoogleNews-vectors-negative300.bin"
+            self.semantics = KeyedVectors.load_word2vec_format(model, binary=True)
+        self.vocabulary = [w for w in list(base_vocabulary) if w in self.semantics]
         self.embeddings = np.array([self.semantics[w] for w in self.vocabulary])
 
     def word_string(self, index):

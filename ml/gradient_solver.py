@@ -87,7 +87,10 @@ class GradientSolver:
     def merge_guess(self, guess, score, score_scaling):
         if self.log: self.log_append('guess', guess)
         self.network.add_node(guess, score)
-      
+
+    def guess_merged(self, guess):
+        return guess in self.network.nodes
+        
     def solve(self, semantle, max_guesses=500):
         if semantle.target not in self.similarity.vocabulary:
             return None, 0      
