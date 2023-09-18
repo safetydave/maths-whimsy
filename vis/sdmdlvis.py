@@ -73,6 +73,7 @@ def equation_elements(equation):
         else_elements = equation_elements(equation.else_)
         elements = if_elements + then_elements + else_elements
     # todo handle more types
+    # delay function has input_function
     return elements
 
 
@@ -90,7 +91,7 @@ def sd_links(nodes):
     return links
 
 
-def model_graph_ids(model):
+def model_graph(model):
     G = nx.DiGraph()
     nodes = sd_nodes(model)
     G.add_nodes_from(nodes)
@@ -138,7 +139,7 @@ def set_eqn_attr(G, model):
     nx.set_node_attributes(G, {(CONVERTER, k): disp_eqn(v.equation) for k, v in model.converters.items()}, 'eqn')
 
 
-def model_graph(model):
+def model_graph_elements(model):
     G = nx.DiGraph()
     # for convenient node order, and for inclusion of CONSTANT nodes
     G.add_nodes_from(sd_node_keys(STOCK, model))
@@ -159,7 +160,7 @@ def node_labels(G, eqn=True):
 
 
 def draw_model_graph(model, ax=None, eqn=True):
-    G = model_graph(model)
+    G = model_graph_elements(model)
     gpos = nx.spring_layout(G)
 
     nx.draw_networkx_nodes(G, ax=ax, pos=gpos, node_size=8000,
@@ -173,7 +174,7 @@ def draw_model_graph(model, ax=None, eqn=True):
                            node_color='lightgrey', node_shape='o')
     nx.draw_networkx_nodes(G, ax=ax, pos=gpos, node_size=4000,
                            nodelist=sd_node_keys(CONVERTER, model),
-                           node_color='lightgrey', node_shape='H')
+                           node_color='lightgrey', node_shape='^')
 
     nx.draw_networkx_edges(G, ax=ax, pos=gpos, node_size=12000,
                            edge_color='grey', width=3, arrowsize=20)
