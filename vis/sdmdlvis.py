@@ -58,22 +58,32 @@ def sd_node_id(name, nodes):
 
 def equation_elements(equation):
     elements = []
+    # terms like stocks
     if sd_label(equation) is not None:
         elements = [equation]
+    # unary functions like sin, cos, etc
     elif hasattr(equation, 'element'):
         elements = [equation.element]
+    # binary functions like +, max(), etc
     elif hasattr(equation, 'element_1'):
         root_elements = [equation.element_1, equation.element_2]
         left_subtree = equation_elements(equation.element_1)
         right_subtree = equation_elements(equation.element_2)
         elements = root_elements + left_subtree + right_subtree
+    # if function
     elif hasattr(equation, 'if_'):
         if_elements = equation_elements(equation.if_)
         then_elements = equation_elements(equation.then_)
         else_elements = equation_elements(equation.else_)
         elements = if_elements + then_elements + else_elements
-    # todo handle more types
-    # delay function has input_function
+    # delay function & possibly other time transformations
+    elif hasattr(equation, 'input_function'):
+        elements = [equation.input_function]
+    # round function
+    elif hasattr(equation, 'operator'):
+        elements = [equation.operator]
+    # todo - handle any more types
+    # from https://bptk.transentis.com/sd-dsl/sd_dsl_functions/sd_dsl_functions.html
     return elements
 
 
