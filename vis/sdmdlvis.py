@@ -78,10 +78,10 @@ def equation_elements(equation):
         elements = if_elements + then_elements + else_elements
     # delay function & possibly other time transformations
     elif hasattr(equation, 'input_function'):
-        elements = [equation.input_function]
+        elements = equation_elements(equation.input_function)
     # round function
     elif hasattr(equation, 'operator'):
-        elements = [equation.operator]
+        elements = equation_elements(equation.operator)
     # todo - handle any more types
     # from https://bptk.transentis.com/sd-dsl/sd_dsl_functions/sd_dsl_functions.html
     return elements
