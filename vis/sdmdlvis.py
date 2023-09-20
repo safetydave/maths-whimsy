@@ -67,16 +67,16 @@ def sd_node_id(name, nodes):
 ALL_ARG_ATTRS = [
     ['element'],
     ['operator'],
+    ['condition'],
     ['element_1', 'element_2'],
+    ['lhs', 'rhs'],
     ['if_', 'then_', 'else_'],
-    ['input_function', 'delay_duration', 'initial_value']
+    ['input_function', 'delay_duration', 'initial_value'],
+    ['volume', 'first_pulse', 'interval']
 ]
 
 
-# todo handle any more types - define dict with {attr_sig: [elements to recurse]}
-# And, Or: lhs, rhs
-# Not: condition
-# pulse: volume, first_pulse, interval
+# todo handle any more types
 # smooth: input_function, averaging_time, figure out how to represent new stock/flow
 # ...
 # distributions and combinatorics
