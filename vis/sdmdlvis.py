@@ -1,3 +1,7 @@
+"""
+Module for visualising BPTK system dynamics models as graphs using Network
+"""
+
 from BPTK_Py import sddsl
 import networkx as nx
 
@@ -17,6 +21,7 @@ SHAPES = {STOCK: 'square', FLOW: 'diamond', CONSTANT: 'dot', CONVERTER: 'triangl
 
 
 def sd_label(element):
+    """Return the label, if any, of an equation element (stock, flow, etc)"""
     t = None
     if type(element) is sddsl.stock.Stock:
         t = STOCK
@@ -30,6 +35,7 @@ def sd_label(element):
 
 
 def sd_items(label, model):
+    """Return all items in model for a given label, as [(name, object)]"""
     items = []
     if label == STOCK:
         items = model.stocks.items()
@@ -43,6 +49,7 @@ def sd_items(label, model):
 
 
 def sd_nodes(model):
+    """Return all nodes in the graph representation of the model as {id: (name, object)}"""
     nodes = {}
     nid = 0
     for l in LABELS:
@@ -53,15 +60,17 @@ def sd_nodes(model):
 
 
 def sd_node_id(name, nodes):
+    """Return the id of the node with the given name, where nodes is {id: (name, object)}"""
     return list(nodes.keys())[list(v[0] for v in nodes.values()).index(name)]
 
 
 def equation_elements(equation):
+    """Recurse through all elements in equation and return a list of labelled elements"""
     elements = []
     # terms like stocks
     if sd_label(equation) is not None:
         elements = [equation]
-    # unary functions like sin, cos, etc
+    # unary functions like sin, cos, abs, exp, etc
     elif hasattr(equation, 'element'):
         elements = [equation.element]
     # binary functions like +, max(), etc
@@ -76,22 +85,33 @@ def equation_elements(equation):
         then_elements = equation_elements(equation.then_)
         else_elements = equation_elements(equation.else_)
         elements = if_elements + then_elements + else_elements
-    # delay function & possibly other time transformations
+    # delay function
     elif hasattr(equation, 'input_function'):
+        # todo disambiguate other functions with input_function param
+        # todo also collect elements from delay_duration, initial_value
         elements = equation_elements(equation.input_function)
     # round function
     elif hasattr(equation, 'operator'):
         elements = equation_elements(equation.operator)
-    # todo - handle any more types
+    # todo handle any more types - define dict with {attr_sig: [elements to recurse]}
+    # And, Or: lhs, rhs
+    # Not: condition
+    # pulse: volume, first_pulse, interval
+    # smooth: input_function, averaging_time, figure out how to represent new stock/flow
+    # ...
+    # distributions and combinatorics
+    # ...
     # from https://bptk.transentis.com/sd-dsl/sd_dsl_functions/sd_dsl_functions.html
     return elements
 
 
 def disp_eqn(eqn):
+    """Make an equation more readable for display"""
     return str(eqn).replace('model.memoize', '')
 
 
 def sd_links(nodes):
+    """Return all the links [(id1, id2)] between nodes resulting from equations in the model"""
     links = []
     for n, v in nodes.items():
         new_links = [(sd_node_id(e.name, nodes), n)
@@ -102,6 +122,7 @@ def sd_links(nodes):
 
 
 def model_graph(model):
+    """Create a NetworkX DiGraph from the BPTK model"""
     G = nx.DiGraph()
     nodes = sd_nodes(model)
     G.add_nodes_from(nodes)
@@ -149,7 +170,7 @@ def set_eqn_attr(G, model):
     nx.set_node_attributes(G, {(CONVERTER, k): disp_eqn(v.equation) for k, v in model.converters.items()}, 'eqn')
 
 
-def model_graph_elements(model):
+def model_graph_labels(model):
     G = nx.DiGraph()
     # for convenient node order, and for inclusion of CONSTANT nodes
     G.add_nodes_from(sd_node_keys(STOCK, model))
@@ -170,7 +191,7 @@ def node_labels(G, eqn=True):
 
 
 def draw_model_graph(model, ax=None, eqn=True):
-    G = model_graph_elements(model)
+    G = model_graph_labels(model)
     gpos = nx.spring_layout(G)
 
     nx.draw_networkx_nodes(G, ax=ax, pos=gpos, node_size=8000,
