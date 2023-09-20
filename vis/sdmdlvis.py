@@ -65,23 +65,34 @@ def sd_node_id(name, nodes):
 
 
 ALL_ARG_ATTRS = [
-    ['element'],
-    ['operator'],
-    ['condition'],
-    ['element_1', 'element_2'],
-    ['lhs', 'rhs'],
-    ['if_', 'then_', 'else_'],
-    ['input_function', 'delay_duration', 'initial_value'],
-    ['volume', 'first_pulse', 'interval']
+    # order more specific args first for complete matching of args
+    # ref https://bptk.transentis.com/sd-dsl/sd_dsl_functions/sd_dsl_functions.html
+    ['left', 'right', 'mean', 'stddev'], # normalcdf
+    ['lower_bound', 'mode', 'upper_bound'], # triangular
+    ['if_', 'then_', 'else_'], # if
+    ['volume', 'first_pulse', 'interval'], # pulse
+    ['input_function', 'delay_duration', 'initial_value'], # delay
+    ['input_function', 'averaging_time'], # trend & smooth - todo connect properly
+    ['element_1', 'element_2'], # +, -, min, max, etc
+    ['lhs', 'rhs'], # and, or
+    ['height', 'timestep'], # step
+    ['amplitude', 'period'], # sinwave, coswave
+    ['min_value', 'max_value'], # random
+    ['shape', 'scale'], # gamma, pareto, weibull
+    ['mean', 'scale'], # logistic
+    ['mean', 'stddev'], # lognormal, normal
+    ['element'], # sin, cos, etc
+    ['condition'], # not
+    ['operator'], # round
+    ['a', 'b'], # beta
+    ['n', 'p'], # binomial
+    ['n', 'r'], # combinations, permutations
+    ['x'], # sqrt
+    ['l'], # exprnd
+    ['n'], # factorial
+    ['p'], # geometric, montecarlo
+    ['mu'], # poisson
 ]
-
-
-# todo handle any more types
-# smooth: input_function, averaging_time, figure out how to represent new stock/flow
-# ...
-# distributions and combinatorics
-# ...
-# from https://bptk.transentis.com/sd-dsl/sd_dsl_functions/sd_dsl_functions.html
 
 
 def attr_match(equation, all_arg_attrs):
