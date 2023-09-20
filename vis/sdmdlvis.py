@@ -64,45 +64,44 @@ def sd_node_id(name, nodes):
     return list(nodes.keys())[list(v[0] for v in nodes.values()).index(name)]
 
 
-def equation_elements(equation):
-    """Recurse through all elements in equation and return a list of labelled elements"""
-    elements = []
-    # terms like stocks
+ALL_ARG_ATTRS = [
+    ['element'],
+    ['operator'],
+    ['element_1', 'element_2'],
+    ['if_', 'then_', 'else_'],
+    ['input_function', 'delay_duration', 'initial_value']
+]
+
+
+# todo handle any more types - define dict with {attr_sig: [elements to recurse]}
+# And, Or: lhs, rhs
+# Not: condition
+# pulse: volume, first_pulse, interval
+# smooth: input_function, averaging_time, figure out how to represent new stock/flow
+# ...
+# distributions and combinatorics
+# ...
+# from https://bptk.transentis.com/sd-dsl/sd_dsl_functions/sd_dsl_functions.html
+
+
+def attr_match(equation, all_arg_attrs):
+    """Find the set of arguments that matches the attributes of this equation"""
+    for aa in all_arg_attrs:
+        if sum([hasattr(equation, a) for a in aa]) == len(aa):
+            return aa
+    return []
+
+
+def equation_terms(equation):
+    """Recurse through all elements in equation and return a list of labelled terms"""
+    terms = []
     if sd_label(equation) is not None:
-        elements = [equation]
-    # unary functions like sin, cos, abs, exp, etc
-    elif hasattr(equation, 'element'):
-        elements = [equation.element]
-    # binary functions like +, max(), etc
-    elif hasattr(equation, 'element_1'):
-        root_elements = [equation.element_1, equation.element_2]
-        left_subtree = equation_elements(equation.element_1)
-        right_subtree = equation_elements(equation.element_2)
-        elements = root_elements + left_subtree + right_subtree
-    # if function
-    elif hasattr(equation, 'if_'):
-        if_elements = equation_elements(equation.if_)
-        then_elements = equation_elements(equation.then_)
-        else_elements = equation_elements(equation.else_)
-        elements = if_elements + then_elements + else_elements
-    # delay function
-    elif hasattr(equation, 'input_function'):
-        # todo disambiguate other functions with input_function param
-        # todo also collect elements from delay_duration, initial_value
-        elements = equation_elements(equation.input_function)
-    # round function
-    elif hasattr(equation, 'operator'):
-        elements = equation_elements(equation.operator)
-    # todo handle any more types - define dict with {attr_sig: [elements to recurse]}
-    # And, Or: lhs, rhs
-    # Not: condition
-    # pulse: volume, first_pulse, interval
-    # smooth: input_function, averaging_time, figure out how to represent new stock/flow
-    # ...
-    # distributions and combinatorics
-    # ...
-    # from https://bptk.transentis.com/sd-dsl/sd_dsl_functions/sd_dsl_functions.html
-    return elements
+        terms = [equation]
+    else:
+        attr_terms = attr_match(equation, ALL_ARG_ATTRS)
+        for a in attr_terms:
+            terms.extend(equation_terms(getattr(equation, a)))
+    return terms
 
 
 def disp_eqn(eqn):
@@ -115,7 +114,7 @@ def sd_links(nodes):
     links = []
     for n, v in nodes.items():
         new_links = [(sd_node_id(e.name, nodes), n)
-                      for e in equation_elements(v[1].equation)
+                      for e in equation_terms(v[1].equation)
                       if hasattr(e, 'name')]
         links.extend(new_links)
     return links
@@ -158,7 +157,7 @@ def sd_edges(label, items):
     edges = []
     for k, v in items:
         edges.extend([((sd_label(e), e.name), (label, k))
-                      for e in equation_elements(v.equation)
+                      for e in equation_terms(v.equation)
                       if hasattr(e, 'name')])
     return edges
 
