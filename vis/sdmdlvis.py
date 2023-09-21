@@ -137,55 +137,65 @@ def sd_links(nodes):
 
 
 def has_generated_net(model, i):
+    """Test if the model has a generated smooth or trend network at count i"""
     for n in model.converters:
         if n == f'bptk_{i}_input_function':
             return True
     return False
 
 
+def generated_net_interface(model, graph, i):
+    """Determine the external interface of generated smooth or trend network"""
+    net_type = None
+    net_ids = []
+    inputs = []
+    outputs = []
+    for j, l in nx.get_node_attributes(graph, 'label').items():
+        if l.startswith(f'bptk_{i}_'):
+            net_ids.append(j)
+            in_edges = list(graph.in_edges(nbunch=[j]))
+            inputs.extend([e[0] for e in in_edges])
+            if l == f'bptk_{i}_smooth' or l == f'bptk_{i}_trend':
+                outputs = [e[1] for e in list(graph.out_edges(nbunch=[j]))]
+                net_type = l.split('_')[-1]
+    return net_type, net_ids, inputs, outputs
+
+
 def collapse_generated_nets(model, graph):
+    """Collapse all generated networks, preserving their interface to the rest of the model"""
     i = 1
+    added = {}
     remove = []
     while has_generated_net(model, i):
-        net_type = None
-        net_ids = []
-        inputs = []
-        output = None
-        for j, l in nx.get_node_attributes(graph, 'label').items():
-            if l.startswith(f'bptk_{i}_'):
-                net_ids.append(j)
-                in_edges = list(graph.in_edges(nbunch=[j]))
-                inputs.extend([e[0] for e in in_edges])
-                if l == f'bptk_{i}_smooth' or l == f'bptk_{i}_trend':
-                    output = list(graph.out_edges(nbunch=[j]))[0][1]
-                    net_type = l.split('_')[-1]
+        net_type, net_ids, inputs, outputs = generated_net_interface(model, graph, i)
         new_id = graph.number_of_nodes()
         graph.add_node(new_id)
-        nx.set_node_attributes(graph, {new_id: f'{net_type} {i}'}, 'label')
-        nx.set_node_attributes(graph, {new_id: f'collapsed {net_type} {i} network'}, 'title')
-        nx.set_node_attributes(graph, {new_id: COLORS[STOCK]}, 'color')
-        nx.set_node_attributes(graph, {new_id: 'triangleDown'}, 'shape')
+        added[new_id] = f'{net_type} {i}'
         graph.add_edges_from([(j, new_id) for j in inputs if j not in net_ids])
-        graph.add_edge(new_id, output)
+        graph.add_edges_from([(new_id, j) for j in outputs if j not in net_ids])
         remove.extend(net_ids)
         i = i + 1
     graph.remove_nodes_from(remove)
+    return added
 
 
 def model_graph(model, collapse=False):
-    """Create a NetworkX DiGraph from the BPTK model"""
+    """Create a NetworkX DiGraph from the BPTK model, optionally collapse generated [sub]networks"""
     G = nx.DiGraph()
     nodes = sd_nodes(model)
     G.add_nodes_from(nodes)
     nx.set_node_attributes(G, {n: e[1].name for n, e in nodes.items()}, 'label')
     nx.set_node_attributes(G, {n: (sd_label(e[1]) + ': ' + disp_eqn(e[1].equation)) for n, e in nodes.items()}, 'title')
-    #nx.set_node_attributes(G, {n: sd_label(e[1]) for n, e in nodes.items()}, 'group')
     nx.set_node_attributes(G, {n: COLORS[sd_label(e[1])] for n, e in nodes.items()}, 'color')
     nx.set_node_attributes(G, {n: SHAPES[sd_label(e[1])] for n, e in nodes.items()}, 'shape')
     G.add_edges_from(sd_links(nodes))
 
     if collapse:
-        collapse_generated_nets(model, G)
+        added = collapse_generated_nets(model, G)
+        nx.set_node_attributes(G, added, 'label')
+        nx.set_node_attributes(G, {n: f'collapsed {l} network' for n, l in added.items()}, 'title')
+        nx.set_node_attributes(G, {n: COLORS[STOCK] for n in added}, 'color')
+        nx.set_node_attributes(G, {n: 'triangleDown' for n in added}, 'shape')
 
     return G
 
