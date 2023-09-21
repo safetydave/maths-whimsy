@@ -66,13 +66,13 @@ def sd_node_id(name, nodes):
 
 ALL_ARG_ATTRS = [
     # order more specific args first for complete matching of args
+    # omit smooth & trend as they require specialised connections
     # ref https://bptk.transentis.com/sd-dsl/sd_dsl_functions/sd_dsl_functions.html
     ['left', 'right', 'mean', 'stddev'], # normalcdf
     ['lower_bound', 'mode', 'upper_bound'], # triangular
     ['if_', 'then_', 'else_'], # if
     ['volume', 'first_pulse', 'interval'], # pulse
     ['input_function', 'delay_duration', 'initial_value'], # delay
-    ['input_function', 'averaging_time'], # trend & smooth - todo connect properly
     ['element_1', 'element_2'], # +, -, min, max, etc
     ['lhs', 'rhs'], # and, or
     ['height', 'timestep'], # step
@@ -112,6 +112,11 @@ def equation_terms(equation):
         attr_terms = attr_match(equation, ALL_ARG_ATTRS)
         for a in attr_terms:
             terms.extend(equation_terms(getattr(equation, a)))
+        # smooth & trend create new networks requiring specialised connections
+        if isinstance(equation, sddsl.operators.Smooth):
+            terms.extend([equation.smooth])
+        if isinstance(equation, sddsl.operators.Trend):
+            terms.extend([equation.trend])
     return terms
 
 
