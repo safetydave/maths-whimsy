@@ -136,7 +136,43 @@ def sd_links(nodes):
     return links
 
 
-def model_graph(model):
+def has_generated_net(model, i):
+    for n in model.converters:
+        if n == f'bptk_{i}_input_function':
+            return True
+    return False
+
+
+def collapse_generated_nets(model, graph):
+    i = 1
+    remove = []
+    while has_generated_net(model, i):
+        net_type = None
+        net_ids = []
+        inputs = []
+        output = None
+        for j, l in nx.get_node_attributes(graph, 'label').items():
+            if l.startswith(f'bptk_{i}_'):
+                net_ids.append(j)
+                in_edges = list(graph.in_edges(nbunch=[j]))
+                inputs.extend([e[0] for e in in_edges])
+                if l == f'bptk_{i}_smooth' or l == f'bptk_{i}_trend':
+                    output = list(graph.out_edges(nbunch=[j]))[0][1]
+                    net_type = l.split('_')[-1]
+        new_id = graph.number_of_nodes()
+        graph.add_node(new_id)
+        nx.set_node_attributes(graph, {new_id: f'{net_type} {i}'}, 'label')
+        nx.set_node_attributes(graph, {new_id: f'collapsed {net_type} {i} network'}, 'title')
+        nx.set_node_attributes(graph, {new_id: COLORS[STOCK]}, 'color')
+        nx.set_node_attributes(graph, {new_id: 'triangleDown'}, 'shape')
+        graph.add_edges_from([(j, new_id) for j in inputs if j not in net_ids])
+        graph.add_edge(new_id, output)
+        remove.extend(net_ids)
+        i = i + 1
+    graph.remove_nodes_from(remove)
+
+
+def model_graph(model, collapse=False):
     """Create a NetworkX DiGraph from the BPTK model"""
     G = nx.DiGraph()
     nodes = sd_nodes(model)
@@ -147,6 +183,10 @@ def model_graph(model):
     nx.set_node_attributes(G, {n: COLORS[sd_label(e[1])] for n, e in nodes.items()}, 'color')
     nx.set_node_attributes(G, {n: SHAPES[sd_label(e[1])] for n, e in nodes.items()}, 'shape')
     G.add_edges_from(sd_links(nodes))
+
+    if collapse:
+        collapse_generated_nets(model, G)
+
     return G
 
 
